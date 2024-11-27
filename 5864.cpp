@@ -1,59 +1,49 @@
 #include <iostream>
-#include <stack>
-#include <string>
+#include <cstring>
 using namespace std;
 
 int Priority(char op) {
-    switch (op) {
-        case '+':
-        case '-':
-            return 1;
-        case '*':
-        case '/':
-            return 2;
-        default:
-            return 0;
-    }
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
 }
 
-void InfixToPrefix(const string& infix) {
-    stack<char> operators;
-    string result;
+void InfixToPrefix(const char infix[]) {
+    char Postfix[20] = {};
+    char symbol_temp[10] = {};
+    int symbol_top = -1, postfix_top = -1;
 
-    for (int i = infix.length() - 1; i >= 0; --i) {
-        char current = infix[i];
+    int len = strlen(infix);
 
-        if (isdigit(current) || isalpha(current)) {
-            result += current;
-        } else if (current == ')') {
-            operators.push(current);
-        } else if (current == '(') {
-            while (!operators.empty() && operators.top() != ')') {
-                result += operators.top();
-                operators.pop();
+    for (int i = len - 1; i >= 0; i--) {
+        if (infix[i] == ')') {
+            symbol_temp[++symbol_top] = infix[i];
+        } else if (infix[i] == '+' || infix[i] == '-' || infix[i] == '*' || infix[i] == '/') {
+            while (symbol_top >= 0 && Priority(infix[i]) < Priority(symbol_temp[symbol_top])) {
+                Postfix[++postfix_top] = symbol_temp[symbol_top--];
             }
-            operators.pop();
+            symbol_temp[++symbol_top] = infix[i];
+        } else if (infix[i] == '(') {
+            while (symbol_top >= 0 && symbol_temp[symbol_top] != ')') {
+                Postfix[++postfix_top] = symbol_temp[symbol_top--];
+            }
+            symbol_top--;
         } else {
-            while (!operators.empty() && Priority(current) < Priority(operators.top())) {
-                result += operators.top();
-                operators.pop();
-            }
-            operators.push(current);
+            Postfix[++postfix_top] = infix[i];
         }
     }
 
-    while (!operators.empty()) {
-        result += operators.top();
-        operators.pop();
+    while (symbol_top >= 0) {
+        Postfix[++postfix_top] = symbol_temp[symbol_top--];
     }
 
-    reverse(result.begin(), result.end());
-    cout << result << endl;
+    for (int i = postfix_top; i >= 0; i--) {
+        cout << Postfix[i];
+    }
 }
 
 int main() {
-    string itemset;
-    cin >> itemset;
-    InfixToPrefix(itemset);
-    return 0;
+    char infix[20];
+    cin >> infix;
+    InfixToPrefix(infix);
 }
